@@ -24,9 +24,10 @@ public class CssClasses
     internal const string DefaultPropertyNameClass = "property-name";
     internal const string DefaultTableCssClass = "table table-sm table-bordered";
     internal const string DefaultCyclicReferenceCssClass = "cyclic-reference";
-
+    internal const string DefaultTextCssClass = "";
     public string Null { get; set; } = DefaultNullCssClass;
     public string PropertyName { get; set; } = DefaultPropertyNameClass;
     public string Table { get; set; } = DefaultTableCssClass;
     public string CyclicReference { get; set; } = DefaultCyclicReferenceCssClass;
+    public string Text { get; set; } = DefaultTextCssClass;
 }

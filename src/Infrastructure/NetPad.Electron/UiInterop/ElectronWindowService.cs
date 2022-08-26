@@ -31,6 +31,7 @@ namespace NetPad.Electron.UiInterop
 
             window.Center();
             window.Maximize();
+            window.WebContents.OpenDevTools();
         }
 
         public async Task OpenSettingsWindowAsync(string? tab = null)

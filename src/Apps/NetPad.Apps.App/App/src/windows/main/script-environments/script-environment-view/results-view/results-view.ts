@@ -11,6 +11,10 @@ export class ResultsView extends ViewModelBase {
 
     private resultsEl: HTMLElement;
     private resultControls: ResultControls;
+    private prevSearch: {search: string, elements : Array<Element>} = {
+        search:'',
+        elements: []
+    };
 
     constructor(private readonly settings: Settings,
                 @ISession private readonly session: ISession,
@@ -57,6 +61,42 @@ export class ResultsView extends ViewModelBase {
     private scriptStatusChanged(newStatus: ScriptStatus, oldStatus: ScriptStatus) {
         if (oldStatus !== "Running" && newStatus === "Running")
             this.clearResults();
+    }
+
+    public findInPage(event) {
+        const search = event.target.value;
+        for (let element of this.prevSearch.elements) {
+            element.innerHTML = element.textContent.replaceAll(`<mark>${this.prevSearch.search}</mark>`, `${this.prevSearch.search}`);
+        }
+
+        this.prevSearch = {
+            search: '',
+            elements: []
+        };
+
+        if (!search)
+            return;
+
+        this.prevSearch.search = search;
+        const searchableElements = Array.from(document.querySelectorAll(".searchable"));
+        for (const ele of searchableElements) {
+            if (ele.textContent.indexOf(search) === -1)
+                continue;
+
+            ele.innerHTML = ele.textContent.replaceAll(search, `<mark>${search}</mark>`);
+            this.prevSearch.elements.push(ele);
+        }
+    }
+
+    public allIndicesOf(text: string, search: string) {
+        const indices = [];
+        let pos = text.indexOf(search);
+        while (pos > -1) {
+            indices.push(pos);
+            pos = text.indexOf(search);
+        }
+
+        return indices;
     }
 }
 

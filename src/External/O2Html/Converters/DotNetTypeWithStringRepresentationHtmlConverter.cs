@@ -18,7 +18,7 @@ public class DotNetTypeWithStringRepresentationHtmlConverter : HtmlConverter
             .Replace("\n", "<br/>")
         ;
 
-        return new Element("span").WithText(str ?? string.Empty);
+        return new Element("span").WithText(str ?? string.Empty).WithAddClass("searchable");
     }
 
     public override void WriteHtmlWithinTableRow<T>(Element tr, T obj, SerializationScope serializationScope, HtmlSerializer htmlSerializer)
