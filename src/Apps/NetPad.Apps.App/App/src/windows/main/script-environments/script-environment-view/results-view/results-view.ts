@@ -11,10 +11,13 @@ export class ResultsView extends ViewModelBase {
 
     private resultsEl: HTMLElement;
     private resultControls: ResultControls;
-    private prevSearch: {search: string, elements : Array<Element>} = {
-        search:'',
-        elements: []
+    private prevSearch: { search: string, elements: Array<Element>, selectedInd: number } = {
+        search: '',
+        elements: [],
+        selectedInd: 0
     };
+
+    public displayFindInPage = false;
 
     constructor(private readonly settings: Settings,
                 @ISession private readonly session: ISession,
@@ -34,10 +37,13 @@ export class ResultsView extends ViewModelBase {
             }
         });
         this.disposables.push(() => token.dispose());
+
+        document.addEventListener("keyup", this.handleKeyUp)
     }
 
     public override detaching() {
         this.resultControls.dispose();
+        document.removeEventListener("keyup", this.handleKeyUp);
         super.detaching();
     }
 
@@ -57,10 +63,20 @@ export class ResultsView extends ViewModelBase {
             this.resultsEl.removeChild(this.resultsEl.lastChild);
     }
 
+    private handleKeyUp = (e) => {
+        if (e.ctrlKey && e.key === 'f') {
+            this.openFindInPage()
+        }
+    }
+
     @watch<ResultsView>(vm => vm.environment.status)
     private scriptStatusChanged(newStatus: ScriptStatus, oldStatus: ScriptStatus) {
         if (oldStatus !== "Running" && newStatus === "Running")
             this.clearResults();
+    }
+
+    public openFindInPage(){
+        this.displayFindInPage = true;
     }
 
     public findInPage(event) {
@@ -71,32 +87,59 @@ export class ResultsView extends ViewModelBase {
 
         this.prevSearch = {
             search: '',
-            elements: []
+            elements: [],
+            selectedInd: 0
         };
 
         if (!search)
             return;
 
         this.prevSearch.search = search;
-        const searchableElements = Array.from(document.querySelectorAll(".searchable"));
+        const searchableElements = Array.from(this.resultsEl.querySelectorAll(".searchable"));
+        let ind = 0;
         for (const ele of searchableElements) {
             if (ele.textContent.indexOf(search) === -1)
                 continue;
 
-            ele.innerHTML = ele.textContent.replaceAll(search, `<mark>${search}</mark>`);
+            ele.innerHTML = ele.textContent.replaceAll(search, `<mark class="${ind === this.prevSearch.selectedInd ? 'selected' : ''}">${search}</mark>`);
             this.prevSearch.elements.push(ele);
+            ind++;
         }
     }
 
-    public allIndicesOf(text: string, search: string) {
-        const indices = [];
-        let pos = text.indexOf(search);
-        while (pos > -1) {
-            indices.push(pos);
-            pos = text.indexOf(search);
+    public closeAndClearFind() {
+        for (let element of this.prevSearch.elements) {
+            if (element === this.prevSearch.elements[this.prevSearch.selectedInd]) {
+                element.innerHTML = element.textContent.replaceAll(`<mark class="selected">${this.prevSearch.search}</mark>`, this.prevSearch.search);
+            } else {
+                element.innerHTML = element.textContent.replaceAll(`<mark>${this.prevSearch.search}</mark>`, this.prevSearch.search);
+            }
         }
 
-        return indices;
+        this.displayFindInPage = false;
+        this.prevSearch = {
+            search: '',
+            elements: [],
+            selectedInd: 0
+        };
+    }
+
+    public selectFoundInPage(ind: number) {
+        ind = this.reArrangeInd(ind);
+
+        this.prevSearch.elements[this.prevSearch.selectedInd].firstElementChild.classList.toggle("selected");
+        this.prevSearch.elements[ind].firstElementChild.classList.toggle("selected");
+        this.prevSearch.elements[ind].scrollIntoView({block: "center", inline: "center", behavior: "smooth"});
+        this.prevSearch.selectedInd = ind;
+    }
+
+    public reArrangeInd(ind) {
+        if (ind >= this.prevSearch.elements.length)
+            return 0
+        else if (ind < 0)
+            return this.prevSearch.elements.length - 1;
+
+        return ind;
     }
 }
 

@@ -4,6 +4,10 @@
             <b>Results</b>
         </div>
         <div class="actions-right col text-end pe-1">
+            <i class="action-icon fas fa-search"
+               title="Open Search"
+               click.trigger="openFindInPage()"></i>
+
             <i class="action-icon tree-collapse-all-icon hover-text-white"
                title="Collapse All"
                click.trigger="resultControls.collapseAllTables()"></i>
@@ -19,17 +23,17 @@
         </div>
     </div>
 </div>
-<div class="row">
+<div class="row" if.bind="displayFindInPage">
     <div class="col d-flex justify-content-end">
         <div class="find-in-page text-end d-flex w-25 justify-content-evenly px-1 py-2">
             <label for="search">
                 <input type="text" class="form-control form-control-sm find-input" placeholder="Search" id="search" keyup.trigger="findInPage($event)">
             </label>
-            <span>0/${prevSearch.elements.length}</span>
-            <span class="clickable" ><i class="fas fa-line"></i></span>
-            <span class="clickable" ><i class="fas fa-arrow-up"></i></span>
-            <span class="clickable" ><i class="fas fa-arrow-down"></i></span>
-            <span class="clickable" ><i class="fas fa-close"></i></span>
+            <span>${prevSearch.search ? prevSearch.selectedInd + 1 : 0}/${prevSearch.elements.length}</span>
+            <span class="clickable"><i class="fas fa-line"></i></span>
+            <span class="clickable" click.trigger="selectFoundInPage(prevSearch.selectedInd - 1)"><i class="fas fa-arrow-up"></i></span>
+            <span class="clickable" click.trigger="selectFoundInPage(prevSearch.selectedInd + 1)"><i class="fas fa-arrow-down"></i></span>
+            <span class="clickable" click.trigger="closeAndClearFind()"><i class="fas fa-close"></i></span>
         </div>
     </div>
 </div>

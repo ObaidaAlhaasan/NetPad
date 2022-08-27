@@ -133,7 +133,11 @@ results-view {
     }
 
     .searchable mark{
-        background-color: orange;
+        background-color: saddlebrown;
         color: white;
+
+        &.selected {
+            background-color: orange;
+        }
     }
 }
