@@ -11,8 +11,8 @@ export class ResultsView extends ViewModelBase {
 
     private resultsEl: HTMLElement;
     private resultControls: ResultControls;
-    private prevSearch: { search: string, elements: Array<Element>, selectedInd: number } = {
-        search: '',
+    private search: { term: string, elements: Array<Element>, selectedInd: number } = {
+        term: '',
         elements: [],
         selectedInd: 0
     };
@@ -56,8 +56,7 @@ export class ResultsView extends ViewModelBase {
         this.resultsEl.appendChild(template.content);
     }
 
-    private clearResults()
-    {
+    private clearResults() {
         this.resultControls.dispose();
         while (this.resultsEl.firstChild)
             this.resultsEl.removeChild(this.resultsEl.lastChild);
@@ -75,69 +74,72 @@ export class ResultsView extends ViewModelBase {
             this.clearResults();
     }
 
-    public openFindInPage(){
+    public openFindInPage() {
         this.displayFindInPage = true;
     }
 
     public findInPage(event) {
         const search = event.target.value;
-        for (let element of this.prevSearch.elements) {
-            element.innerHTML = element.textContent.replaceAll(`<mark>${this.prevSearch.search}</mark>`, `${this.prevSearch.search}`);
-        }
+        console.log(search, this.search);
 
-        this.prevSearch = {
-            search: '',
-            elements: [],
-            selectedInd: 0
-        };
-
-        if (!search)
+        if (!search || search === ' ') {
+            this.clearSearch();
             return;
-
-        this.prevSearch.search = search;
-        const searchableElements = Array.from(this.resultsEl.querySelectorAll(".searchable"));
-        let ind = 0;
-        for (const ele of searchableElements) {
-            if (ele.textContent.indexOf(search) === -1)
-                continue;
-
-            ele.innerHTML = ele.textContent.replaceAll(search, `<mark class="${ind === this.prevSearch.selectedInd ? 'selected' : ''}">${search}</mark>`);
-            this.prevSearch.elements.push(ele);
-            ind++;
         }
+
+        const searchableElements = Array.from(this.resultsEl.querySelectorAll(".searchable"));
+        for (const ele of searchableElements) {
+            if (!ele.textContent) continue;
+            ele.innerHTML = ele.textContent?.replaceAll(search, `<mark>${search}</mark>`);
+        }
+
+        this.search.term = search;
+        this.search.elements = Array.from(this.resultsEl.querySelectorAll(".searchable mark"));
+        this.search.elements[0]?.classList?.add("selected");
     }
 
-    public closeAndClearFind() {
-        for (let element of this.prevSearch.elements) {
-            if (element === this.prevSearch.elements[this.prevSearch.selectedInd]) {
-                element.innerHTML = element.textContent.replaceAll(`<mark class="selected">${this.prevSearch.search}</mark>`, this.prevSearch.search);
-            } else {
-                element.innerHTML = element.textContent.replaceAll(`<mark>${this.prevSearch.search}</mark>`, this.prevSearch.search);
+    public clearSearch() {
+        for (let element of this.search.elements) {
+            // if (!element?.parentElement?.innerHTML)
+            //     continue;
+            if (element.parentElement?.innerHTML) {
+                if (element === this.search.elements[this.search.selectedInd]) {
+                    console.log("Cleaning selected element  ", element);
+                    element.parentElement.innerHTML = element.parentElement.innerHTML?.replaceAll(`<mark class="selected">${this.search.term}</mark>`, this.search.term);
+                } else {
+                    debugger;
+                    console.log("Cleaning element   ", element);
+                    element.parentElement.innerHTML = element.parentElement.innerHTML?.replaceAll(`<mark>${this.search.term}</mark>`, this.search.term);
+                }
             }
         }
 
-        this.displayFindInPage = false;
-        this.prevSearch = {
-            search: '',
+        this.search = {
+            term: '',
             elements: [],
             selectedInd: 0
         };
+    }
+
+    public closeAndClearFind() {
+        this.clearSearch();
+        this.displayFindInPage = false;
     }
 
     public selectFoundInPage(ind: number) {
         ind = this.reArrangeInd(ind);
 
-        this.prevSearch.elements[this.prevSearch.selectedInd].firstElementChild.classList.toggle("selected");
-        this.prevSearch.elements[ind].firstElementChild.classList.toggle("selected");
-        this.prevSearch.elements[ind].scrollIntoView({block: "center", inline: "center", behavior: "smooth"});
-        this.prevSearch.selectedInd = ind;
+        this.search.elements[this.search.selectedInd].classList.remove("selected");
+        this.search.elements[ind].classList.add("selected");
+        this.search.elements[ind].scrollIntoView({block: "center", inline: "center", behavior: "smooth"});
+        this.search.selectedInd = ind;
     }
 
     public reArrangeInd(ind) {
-        if (ind >= this.prevSearch.elements.length)
+        if (ind >= this.search.elements.length)
             return 0
         else if (ind < 0)
-            return this.prevSearch.elements.length - 1;
+            return this.search.elements.length - 1;
 
         return ind;
     }

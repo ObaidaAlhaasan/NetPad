@@ -29,10 +29,10 @@
             <label for="search">
                 <input type="text" class="form-control form-control-sm find-input" placeholder="Search" id="search" keyup.trigger="findInPage($event)">
             </label>
-            <span>${prevSearch.search ? prevSearch.selectedInd + 1 : 0}/${prevSearch.elements.length}</span>
+            <span>${search.term ? search.selectedInd + 1 : 0}/${search.elements.length}</span>
             <span class="clickable"><i class="fas fa-line"></i></span>
-            <span class="clickable" click.trigger="selectFoundInPage(prevSearch.selectedInd - 1)"><i class="fas fa-arrow-up"></i></span>
-            <span class="clickable" click.trigger="selectFoundInPage(prevSearch.selectedInd + 1)"><i class="fas fa-arrow-down"></i></span>
+            <span class="clickable" click.trigger="selectFoundInPage(search.selectedInd - 1)"><i class="fas fa-arrow-up"></i></span>
+            <span class="clickable" click.trigger="selectFoundInPage(search.selectedInd + 1)"><i class="fas fa-arrow-down"></i></span>
             <span class="clickable" click.trigger="closeAndClearFind()"><i class="fas fa-close"></i></span>
         </div>
     </div>
